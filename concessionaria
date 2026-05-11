@@ -1,0 +1,128 @@
+import sqlite3
+
+conn = sqlite3.connect("concessionaria.db")
+cursor = conn.cursor()
+
+cursor.execute("""
+CREATE TABLE IF NOT EXISTS carros (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    marca TEXT NOT NULL,
+    modelo TEXT NOT NULL,
+    ano INTEGER,
+    preco REAL
+)
+""")
+
+conn.commit()
+
+# cadastrando carros fixos
+carros = [
+
+    # PORSCHE
+    ("Porsche", "911 Carrera", 2024, 890000),
+    ("Porsche", "Cayenne", 2023, 750000),
+    ("Porsche", "Panamera", 2024, 820000),
+
+    # BMW
+    ("BMW", "X6", 2024, 680000),
+    ("BMW", "M3", 2023, 720000),
+    ("BMW", "320i", 2024, 350000),
+
+    # JAGUAR
+    ("Jaguar", "F-Pace", 2024, 610000),
+    ("Jaguar", "XE", 2023, 390000),
+    ("Jaguar", "I-Pace", 2024, 700000)
+]
+
+cursor.executemany("""
+INSERT INTO carros (marca, modelo, ano, preco)
+VALUES (?, ?, ?, ?)
+""", carros)
+
+conn.commit()
+
+
+
+def listar_carros():
+    try:
+
+        cursor.execute("SELECT * FROM carros")
+
+        carros = cursor.fetchall()
+
+        print("\n===== CARROS DISPONÍVEIS =====\n")
+
+        for carro in carros:
+
+            print(f"""
+Registro: {carro[0]}
+Marca: {carro[1]}
+Modelo: {carro[2]}
+Ano: {carro[3]}
+Preço: R$ {carro[4]:,.2f}
+--------------------------------
+""")
+
+    except Exception as erro:
+        print("Erro ao listar carros:", erro)
+
+
+def buscar_marca():
+    try:
+
+        marca = input("Digite a marca: ")
+
+        cursor.execute("""
+        SELECT * FROM carros
+        WHERE marca = ?
+        """, (marca,))
+
+        carros = cursor.fetchall()
+
+        print(f"\n===== {marca.upper()} =====\n")
+
+        for carro in carros:
+
+            print(f"""
+Registro: {carro[0]}
+Marca: {carro[1]}
+Modelo: {carro[2]}
+Ano: {carro[3]}
+Preço: R$ {carro[4]:,.2f}
+----------------------------
+""")
+
+    except Exception as erro:
+        print("Erro na busca:", erro)
+
+
+
+while True:
+
+    print("""
+=========== CONCESSIONÁRIA ===========
+
+1 - Listar carros
+2 - Buscar por marca
+3 - Sair
+
+======================================
+""")
+
+    opcao = input("Escolha uma opção: ")
+
+    if opcao == "1":
+        listar_carros()
+
+    elif opcao == "2":
+        buscar_marca()
+
+    elif opcao == "3":
+        print("Sistema encerrado.")
+        break
+
+    else:
+        print("Opção inválida!")
+
+
+conn.close()
